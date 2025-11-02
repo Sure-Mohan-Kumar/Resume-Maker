@@ -9,6 +9,16 @@ const { version } = require("./package.json");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const path = require("path");
+
+// Serve frontend files
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// Fallback: send index.html for any unknown routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
 
 // ========================================
 // 🚀 ResumeCraft Server Initialization
