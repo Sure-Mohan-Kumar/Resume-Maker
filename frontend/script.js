@@ -3,7 +3,7 @@
  * Handles resume generation, PDF/Word download, and UI updates safely
  */
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://resume-maker-91k6.onrender.com/api";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
