@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeCraft - AI Resume Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>ResumeCraft</h1>
+                <p>AI-Powered Resume Generator • Built for Recruiters</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Input -->
+            <div class="panel input-panel">
+                <div class="panel-header">
+                    <h2>Your Details</h2>
+                    <span class="char-count"><span id="charCount">0</span>/5000</span>
+                </div>
+
+                <textarea
+                    id="resumePrompt"
+                    class="prompt-textarea"
+                    placeholder="Paste your resume details here...
+
+Example:
+My name is John Doe, I'm a B.Tech student at IIT Delhi with CGPA 8.5. I have internship experience at Google working on ML systems. Skills: Python, TensorFlow, PyTorch. Projects: Built an NLP chatbot that achieved 95% accuracy. Awards: Won TechFest 2024 1st prize among 300+ participants."
+                    autocomplete="off"
+                    spellcheck="true"
+                ></textarea>
+
+                <div class="input-actions">
+                    <button id="generateBtn" class="btn btn-primary" type="button">
+                        <span class="btn-text">Generate Resume</span>
+                        <span class="spinner hidden"></span>
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="error-message hidden"></div>
+                <div id="successMessage" class="success-message hidden"></div>
+
+                <div class="tips">
+                    <h4>💡 Tips for Best Results:</h4>
+                    <ul>
+                        <li>Include your full name, email, and phone</li>
+                        <li>Add education details with CGPA/scores</li>
+                        <li>Mention internships/experience with duration</li>
+                        <li>Include projects with technologies used</li>
+                        <li>Highlight achievements and awards</li>
+                        <li>Use quantifiable metrics (10K users, 25% faster)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Panel - Preview -->
+            <div class="panel preview-panel">
+                <div class="panel-header">
+                    <h2>Resume Preview</h2>
+                    <div class="preview-actions">
+                        <button id="downloadDocxBtn" class="btn btn-secondary hidden" type="button">
+                            📝 Download Word
+                        </button>
+
+                        <button id="downloadBtn" class="btn btn-secondary hidden" type="button">
+                            📥 Download PDF
+                        </button>
+                        <button id="copyBtn" class="btn btn-secondary hidden" type="button">
+                            📋 Copy Text
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resumePreview" class="resume-preview">
+                    <p class="placeholder">Your generated resume will appear here...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>ResumeCraft © 2024 | AI Resume Generator | Powered by Google Gemini API</p>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
