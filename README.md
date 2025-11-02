@@ -1,7 +1,9 @@
 # 🧠 ResumeCraft — AI-Powered Resume Generator
-
+---
+##
 ResumeCraft is a full-stack application that generates professional resumes using **Google Gemini AI**. 
 It features a modern glassmorphic UI and provides resume downloads in both **PDF** and **Word (DOCX)** formats.
+##
 ---
 ## 🚀 Features
 - ⚡ AI-powered resume content generation using Google Gemini API
