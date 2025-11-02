@@ -10,25 +10,21 @@
 <body>
   <!-- Navigation -->
   <nav class="navbar">
-    <div class="nav-left">
-      <div class="logo">🪄 ResumeCraft</div>
-    </div>
-    <div class="nav-right">
-      <a href="https://github.com/" target="_blank" class="nav-btn">⭐ Star on GitHub</a>
-    </div>
+    <div class="logo">🪄 ResumeCraft</div>
+    <a href="https://github.com/" target="_blank" class="nav-btn">⭐ Star on GitHub</a>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main Container -->
   <main class="main-container">
     <!-- Input Section -->
     <section class="input-section glass">
       <h2>Enter Your Details</h2>
-      <p>Paste your academic, professional, and project details below. The AI will craft a polished resume from it.</p>
+      <p>Paste your resume details below. The AI will craft a clean, formatted resume for you.</p>
 
       <textarea
         id="resumePrompt"
         placeholder="Example:
-I’m Riya Sharma, a B.Tech CSE student at MIT with CGPA 8.7. Worked on backend APIs at InnovateTech, built SkillTrack app using React & Node.js..."
+I'm Riya Sharma, a B.Tech CSE student at MIT with CGPA 8.7. Worked on backend APIs at InnovateTech..."
       ></textarea>
 
       <div class="action-buttons">
@@ -36,6 +32,11 @@ I’m Riya Sharma, a B.Tech CSE student at MIT with CGPA 8.7. Worked on backend 
           <span class="btn-text">✨ Generate Resume</span>
           <span class="spinner hidden"></span>
         </button>
+      </div>
+
+      <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loader"></div>
+        <p>Generating your resume...</p>
       </div>
 
       <div id="errorMessage" class="alert error hidden"></div>
@@ -46,8 +47,9 @@ I’m Riya Sharma, a B.Tech CSE student at MIT with CGPA 8.7. Worked on backend 
     <section class="preview-section glass">
       <div class="preview-header">
         <h2>Resume Preview</h2>
-        <div>
+        <div class="preview-buttons">
           <button id="downloadBtn" class="btn-secondary hidden">📥 PDF</button>
+          <button id="downloadWordBtn" class="btn-secondary hidden">📝 Word</button>
           <button id="copyBtn" class="btn-secondary hidden">📋 Copy</button>
         </div>
       </div>

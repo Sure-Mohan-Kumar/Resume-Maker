@@ -15,7 +15,7 @@ body {
   flex-direction: column;
 }
 
-/* ---------- Navbar ---------- */
+/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -26,7 +26,6 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
-  z-index: 100;
 }
 
 .logo {
@@ -38,18 +37,16 @@ body {
 .nav-btn {
   background: #1a237e;
   color: white;
-  border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
   text-decoration: none;
+  transition: 0.2s ease;
 }
 .nav-btn:hover {
   opacity: 0.9;
 }
 
-/* ---------- Main Container ---------- */
+/* Layout */
 .main-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -63,14 +60,13 @@ body {
   border-radius: 16px;
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
   padding: 2rem;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: 0.25s ease;
 }
 .glass:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* ---------- Textarea ---------- */
+/* Textarea */
 textarea {
   width: 100%;
   height: 260px;
@@ -78,19 +74,18 @@ textarea {
   padding: 1rem;
   border-radius: 10px;
   border: 1px solid #ddd;
-  resize: none;
   font-size: 0.95rem;
   line-height: 1.6;
-  outline: none;
-  transition: border 0.2s ease;
+  resize: none;
   background: #fff;
+  transition: border 0.2s ease;
 }
 textarea:focus {
   border-color: #1a237e;
   box-shadow: 0 0 4px rgba(26, 35, 126, 0.3);
 }
 
-/* ---------- Buttons ---------- */
+/* Buttons */
 .action-buttons {
   margin-top: 1.2rem;
   display: flex;
@@ -123,7 +118,35 @@ textarea:focus {
   background: #d5ddff;
 }
 
-/* ---------- Alerts ---------- */
+/* Loader Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  z-index: 10;
+}
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1a237e;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Alerts */
 .alert {
   margin-top: 1rem;
   padding: 0.8rem 1rem;
@@ -139,12 +162,16 @@ textarea:focus {
   color: #2e7d32;
 }
 
-/* ---------- Resume Preview ---------- */
+/* Preview */
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+}
+.preview-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .resume-preview {
@@ -164,7 +191,7 @@ textarea:focus {
   margin-top: 150px;
 }
 
-/* ---------- Footer ---------- */
+/* Footer */
 .footer {
   text-align: center;
   padding: 1rem;
@@ -178,32 +205,16 @@ textarea:focus {
   display: none;
 }
 
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #eee;
-  border-top: 3px solid #1a237e;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ---------- Responsive ---------- */
+/* Responsive */
 @media (max-width: 900px) {
   .main-container {
     grid-template-columns: 1fr;
     padding: 1rem;
   }
-
-  .resume-preview {
-    height: 400px;
-  }
-
   .glass {
     padding: 1.5rem;
+  }
+  .resume-preview {
+    height: 400px;
   }
 }

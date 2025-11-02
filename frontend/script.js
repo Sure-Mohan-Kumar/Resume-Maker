@@ -1,33 +1,34 @@
 /**
- * ResumeCraft Frontend – Stable Version (2025)
- * Handles resume generation, PDF/Word download, and UI updates safely
+ * ResumeCraft Frontend – Modern UI Version (2025)
+ * Handles resume generation, PDF/Word download, clipboard copy, and animations
  */
 
 const API_URL = "https://resume-maker-91k6.onrender.com/api";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
-// DOM elements (safely)
+// DOM elements
 const resumePrompt = document.getElementById("resumePrompt");
 const generateBtn = document.getElementById("generateBtn");
 const downloadBtn = document.getElementById("downloadBtn");
-const downloadDocxBtn = document.getElementById("downloadDocxBtn");
+const downloadWordBtn = document.getElementById("downloadWordBtn");
 const copyBtn = document.getElementById("copyBtn");
 const resumePreview = document.getElementById("resumePreview");
 const errorMessage = document.getElementById("errorMessage");
 const successMessage = document.getElementById("successMessage");
 const charCount = document.getElementById("charCount");
+const loadingOverlay = document.getElementById("loadingOverlay");
 
 let currentResumeData = null;
 let isGenerating = false;
 
 // === INIT ===
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🔧 ResumeCraft frontend loaded...");
+  console.log("🚀 ResumeCraft frontend initialized...");
   if (resumePrompt) resumePrompt.addEventListener("input", handleCharacterCount);
   if (generateBtn) generateBtn.addEventListener("click", generateResume);
   if (downloadBtn) downloadBtn.addEventListener("click", downloadPDF);
-  if (downloadDocxBtn) downloadDocxBtn.addEventListener("click", downloadWord);
+  if (downloadWordBtn) downloadWordBtn.addEventListener("click", downloadDOCX);
   if (copyBtn) copyBtn.addEventListener("click", copyToClipboard);
   await checkAPIConnectivity();
 });
@@ -46,10 +47,10 @@ function handleCharacterCount(e) {
 async function checkAPIConnectivity() {
   try {
     const response = await fetch(`${API_URL.replace("/api", "")}/health`);
-    if (response.ok) console.log("✓ Backend server connected");
-    else console.warn("⚠ Backend responded but not healthy");
+    if (response.ok) console.log("✅ Backend connected");
+    else console.warn("⚠️ Backend responded but unhealthy");
   } catch (error) {
-    console.warn("⚠ Cannot reach backend:", error.message);
+    console.warn("⚠️ Cannot reach backend:", error.message);
   }
 }
 
@@ -81,6 +82,7 @@ async function generateResume() {
     if (generateBtn) generateBtn.disabled = true;
     if (btnText) btnText.style.display = "none";
     if (spinner) spinner.classList.remove("hidden");
+    if (loadingOverlay) loadingOverlay.classList.remove("hidden"); // show overlay
 
     console.log("📨 Sending resume generation request...");
 
@@ -98,17 +100,18 @@ async function generateResume() {
     showSuccess("Resume generated successfully!");
 
     if (downloadBtn) downloadBtn.classList.remove("hidden");
-    if (downloadDocxBtn) downloadDocxBtn.classList.remove("hidden");
+    if (downloadWordBtn) downloadWordBtn.classList.remove("hidden");
     if (copyBtn) copyBtn.classList.remove("hidden");
   } catch (error) {
     console.error("✗ API error:", error.message);
     showError(error.message || "Failed to generate resume");
   } finally {
-    // ✅ 100% safe cleanup
+    // Cleanup
     isGenerating = false;
     if (generateBtn) generateBtn.disabled = false;
     if (btnText && btnText.style) btnText.style.display = "inline";
     if (spinner && spinner.classList) spinner.classList.add("hidden");
+    if (loadingOverlay) loadingOverlay.classList.add("hidden"); // hide overlay
   }
 }
 
@@ -120,7 +123,7 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
     return response;
   } catch (error) {
     if (retries > 0) {
-      console.warn(`⚠ Retry ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`);
+      console.warn(`⚠️ Retry ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`);
       await new Promise((r) => setTimeout(r, RETRY_DELAY));
       return fetchWithRetry(url, options, retries - 1);
     }
@@ -128,7 +131,7 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
   }
 }
 
-// === DISPLAY RESUME PREVIEW ===
+// === DISPLAY RESUME ===
 function displayResume(data) {
   if (!resumePreview) return;
   try {
@@ -174,10 +177,7 @@ function formatField(value) {
 // === DOWNLOAD PDF ===
 async function downloadPDF() {
   try {
-    if (!currentResumeData) {
-      showError("No resume data available");
-      return;
-    }
+    if (!currentResumeData) return showError("No resume data available");
 
     const response = await fetch(`${API_URL}/download-pdf`, {
       method: "POST",
@@ -190,7 +190,6 @@ async function downloadPDF() {
       throw new Error(`Failed to generate PDF: ${err}`);
     }
 
-    // convert blob to downloadable file
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -205,18 +204,18 @@ async function downloadPDF() {
 }
 
 // === DOWNLOAD WORD ===
-
-downloadDocxBtn.addEventListener("click", downloadDOCX);
-
 async function downloadDOCX() {
   try {
     if (!currentResumeData) return showError("No resume data available");
+
     const response = await fetch(`${API_URL}/download-docx`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(currentResumeData),
     });
+
     if (!response.ok) throw new Error("Failed to generate DOCX");
+
     const blob = await response.blob();
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -227,7 +226,6 @@ async function downloadDOCX() {
     showError("Failed to generate Word document.");
   }
 }
-
 
 // === COPY TO CLIPBOARD ===
 async function copyToClipboard() {
@@ -241,26 +239,29 @@ async function copyToClipboard() {
   }
 }
 
-// === UTILITY HELPERS ===
+// === UTILITIES ===
 function escapeHtml(text) {
   const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
+
 function showError(msg) {
   if (!errorMessage) return;
   errorMessage.textContent = msg;
   errorMessage.classList.remove("hidden");
   if (successMessage) successMessage.classList.add("hidden");
 }
+
 function showSuccess(msg) {
   if (!successMessage) return;
   successMessage.textContent = msg;
   successMessage.classList.remove("hidden");
   if (errorMessage) errorMessage.classList.add("hidden");
 }
+
 function clearMessages() {
   if (errorMessage) errorMessage.classList.add("hidden");
   if (successMessage) successMessage.classList.add("hidden");
 }
 
-console.log("🎉 ResumeCraft initialized successfully!");
+console.log("🎉 ResumeCraft loaded and ready!");
