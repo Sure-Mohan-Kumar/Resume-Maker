@@ -100,6 +100,22 @@ try {
 // ========================================
 // ⚠️ 404 HANDLER
 // ========================================
+
+// ✅ Root route (homepage)
+app.get("/", (req, res) => {
+  res.send(`
+    <h1 style="text-align:center; font-family:Arial;">🚀 ResumeCraft Backend is Running!</h1>
+    <p style="text-align:center;">Available Endpoints:</p>
+    <ul style="font-family:Arial; line-height:1.6;">
+      <li>✅ GET /health</li>
+      <li>✅ POST /api/generate-resume</li>
+      <li>✅ POST /api/download-pdf</li>
+      <li>✅ POST /api/download-docx</li>
+    </ul>
+    <p style="text-align:center; color:gray;">© 2025 ResumeCraft AI</p>
+  `);
+});
+
 app.use((req, res) => {
   try {
     res.status(404).json({
