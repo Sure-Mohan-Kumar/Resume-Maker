@@ -11,15 +11,15 @@
   <!-- Navigation -->
   <nav class="navbar">
     <div class="logo">🪄 ResumeCraft</div>
-    <a href="https://github.com/" target="_blank" class="nav-btn">⭐ Star on GitHub</a>
+    <a href="https://github.com/Sure-Mohan-Kumar/Resume-Maker" target="_blank" class="nav-btn">⭐ Star on GitHub</a>
   </nav>
 
   <!-- Main Container -->
-  <main class="main-container">
+  <main class="main-container single">
     <!-- Input Section -->
     <section class="input-section glass">
       <h2>Enter Your Details</h2>
-      <p>Paste your resume details below. The AI will craft a clean, formatted resume for you.</p>
+      <p>Paste your resume details below. The AI will craft a structured JSON resume for you.</p>
 
       <textarea
         id="resumePrompt"
@@ -29,33 +29,31 @@ I'm Riya Sharma, a B.Tech CSE student at MIT with CGPA 8.7. Worked on backend AP
 
       <div class="action-buttons">
         <button id="generateBtn" class="btn-primary">
-          <span class="btn-text">✨ Generate Resume</span>
+          <span class="btn-text">✨ Generate Resume JSON</span>
           <span class="spinner hidden"></span>
         </button>
       </div>
 
       <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loader"></div>
-        <p>Generating your resume...</p>
+        <div class="modern-loader">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <p>Generating your structured resume...</p>
       </div>
 
       <div id="errorMessage" class="alert error hidden"></div>
       <div id="successMessage" class="alert success hidden"></div>
-    </section>
 
-    <!-- Preview Section -->
-    <section class="preview-section glass">
-      <div class="preview-header">
-        <h2>Resume Preview</h2>
-        <div class="preview-buttons">
-          <button id="downloadBtn" class="btn-secondary hidden">📥 PDF</button>
-          <button id="downloadWordBtn" class="btn-secondary hidden">📝 Word</button>
-          <button id="copyBtn" class="btn-secondary hidden">📋 Copy</button>
-        </div>
-      </div>
+      <!-- JSON Output Section -->
+      <pre id="jsonOutput" class="json-output hidden">{}</pre>
 
-      <div id="resumePreview" class="resume-preview">
-        <p class="placeholder">Your generated resume will appear here...</p>
+      <!-- Buttons (appear after generation) -->
+      <div class="output-buttons hidden" id="outputButtons">
+        <button id="downloadBtn" class="btn-secondary">📥 PDF</button>
+        <button id="downloadWordBtn" class="btn-secondary">📝 Word</button>
+        <button id="copyBtn" class="btn-secondary">📋 Copy JSON</button>
       </div>
     </section>
   </main>

@@ -1,267 +1,108 @@
-/**
- * ResumeCraft Frontend – Modern UI Version (2025)
- * Handles resume generation, PDF/Word download, clipboard copy, and animations
- */
-
 const API_URL = "https://resume-maker-91k6.onrender.com/api";
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
 
-// DOM elements
 const resumePrompt = document.getElementById("resumePrompt");
 const generateBtn = document.getElementById("generateBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const downloadWordBtn = document.getElementById("downloadWordBtn");
 const copyBtn = document.getElementById("copyBtn");
-const resumePreview = document.getElementById("resumePreview");
+const loadingOverlay = document.getElementById("loadingOverlay");
 const errorMessage = document.getElementById("errorMessage");
 const successMessage = document.getElementById("successMessage");
-const charCount = document.getElementById("charCount");
-const loadingOverlay = document.getElementById("loadingOverlay");
+const jsonOutput = document.getElementById("jsonOutput");
+const outputButtons = document.getElementById("outputButtons");
 
 let currentResumeData = null;
-let isGenerating = false;
 
-// === INIT ===
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🚀 ResumeCraft frontend initialized...");
-  if (resumePrompt) resumePrompt.addEventListener("input", handleCharacterCount);
-  if (generateBtn) generateBtn.addEventListener("click", generateResume);
-  if (downloadBtn) downloadBtn.addEventListener("click", downloadPDF);
-  if (downloadWordBtn) downloadWordBtn.addEventListener("click", downloadDOCX);
-  if (copyBtn) copyBtn.addEventListener("click", copyToClipboard);
-  await checkAPIConnectivity();
-});
+generateBtn.addEventListener("click", async () => {
+  const prompt = resumePrompt.value.trim();
+  if (prompt.length < 50) return showError("Please enter at least 50 characters.");
 
-// === CHARACTER COUNT ===
-function handleCharacterCount(e) {
-  const count = e.target.value.length;
-  if (charCount) {
-    charCount.textContent = count;
-    charCount.style.color =
-      count < 50 ? "#dc3545" : count > 4500 ? "#ffc107" : "#999";
-  }
-}
-
-// === BACKEND HEALTH CHECK ===
-async function checkAPIConnectivity() {
-  try {
-    const response = await fetch(`${API_URL.replace("/api", "")}/health`);
-    if (response.ok) console.log("✅ Backend connected");
-    else console.warn("⚠️ Backend responded but unhealthy");
-  } catch (error) {
-    console.warn("⚠️ Cannot reach backend:", error.message);
-  }
-}
-
-// === PROMPT VALIDATION ===
-function validatePrompt(prompt) {
-  if (!prompt || typeof prompt !== "string")
-    return { valid: false, error: "Prompt must be a string" };
-  const trimmed = prompt.trim();
-  if (trimmed.length < 50)
-    return { valid: false, error: "Minimum 50 characters required" };
-  if (trimmed.length > 5000)
-    return { valid: false, error: "Maximum 5000 characters allowed" };
-  return { valid: true };
-}
-
-// === GENERATE RESUME ===
-async function generateResume() {
-  const btnText = document.querySelector(".btn-text");
-  const spinner = document.querySelector(".spinner");
+  clearMessages();
+  toggleLoading(true);
 
   try {
-    if (isGenerating) return showError("Already generating...");
-    const prompt = resumePrompt?.value || "";
-    const validation = validatePrompt(prompt);
-    if (!validation.valid) return showError(validation.error);
-
-    clearMessages();
-    isGenerating = true;
-    if (generateBtn) generateBtn.disabled = true;
-    if (btnText) btnText.style.display = "none";
-    if (spinner) spinner.classList.remove("hidden");
-    if (loadingOverlay) loadingOverlay.classList.remove("hidden"); // show overlay
-
-    console.log("📨 Sending resume generation request...");
-
-    const response = await fetchWithRetry(`${API_URL}/generate-resume`, {
+    const res = await fetch(`${API_URL}/generate-resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
 
-    const result = await response.json();
-    if (!result.success) throw new Error(result.error);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Generation failed.");
 
-    currentResumeData = result.data;
-    displayResume(currentResumeData);
-    showSuccess("Resume generated successfully!");
-
-    if (downloadBtn) downloadBtn.classList.remove("hidden");
-    if (downloadWordBtn) downloadWordBtn.classList.remove("hidden");
-    if (copyBtn) copyBtn.classList.remove("hidden");
-  } catch (error) {
-    console.error("✗ API error:", error.message);
-    showError(error.message || "Failed to generate resume");
-  } finally {
-    // Cleanup
-    isGenerating = false;
-    if (generateBtn) generateBtn.disabled = false;
-    if (btnText && btnText.style) btnText.style.display = "inline";
-    if (spinner && spinner.classList) spinner.classList.add("hidden");
-    if (loadingOverlay) loadingOverlay.classList.add("hidden"); // hide overlay
-  }
-}
-
-// === FETCH WITH RETRY ===
-async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response;
-  } catch (error) {
-    if (retries > 0) {
-      console.warn(`⚠️ Retry ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`);
-      await new Promise((r) => setTimeout(r, RETRY_DELAY));
-      return fetchWithRetry(url, options, retries - 1);
-    }
-    throw error;
-  }
-}
-
-// === DISPLAY RESUME ===
-function displayResume(data) {
-  if (!resumePreview) return;
-  try {
-    let html = `<div class="resume-header"><h2>${escapeHtml(data.name || "Name")}</h2>`;
-    if (data.email || data.phone) {
-      html += `<p>${escapeHtml(data.email || "")}${
-        data.phone ? " | " + escapeHtml(data.phone) : ""
-      }</p>`;
-    }
-    html += "</div>";
-
-    if (data.professional_summary)
-      html += `<h3>Professional Summary</h3><p>${escapeHtml(
-        data.professional_summary
-      )}</p>`;
-    if (data.education)
-      html += `<h3>Education</h3><p>${escapeHtml(formatField(data.education))}</p>`;
-    if (data.skills)
-      html += `<h3>Skills</h3><p>${escapeHtml(formatField(data.skills))}</p>`;
-    if (data.experience)
-      html += `<h3>Experience</h3><p>${escapeHtml(formatField(data.experience))}</p>`;
-    if (data.projects)
-      html += `<h3>Projects</h3><p>${escapeHtml(formatField(data.projects))}</p>`;
-    if (data.achievements)
-      html += `<h3>Achievements</h3><p>${escapeHtml(
-        formatField(data.achievements)
-      )}</p>`;
-
-    resumePreview.innerHTML = html;
+    currentResumeData = data.data;
+    displayJSON(currentResumeData);
+    showSuccess("✅ Resume JSON generated successfully!");
+    outputButtons.classList.remove("hidden");
   } catch (err) {
-    resumePreview.innerHTML =
-      "<p style='color:#dc3545;'>Error displaying resume.</p>";
+    showError(err.message || "Something went wrong.");
+  } finally {
+    toggleLoading(false);
   }
+});
+
+function displayJSON(data) {
+  jsonOutput.classList.remove("hidden");
+  jsonOutput.textContent = JSON.stringify(data, null, 2);
 }
 
-function formatField(value) {
-  if (!value) return "";
-  if (Array.isArray(value)) return value.join(", ");
-  if (typeof value === "object") return Object.values(value).join(", ");
-  return value;
-}
-
-// === DOWNLOAD PDF ===
-async function downloadPDF() {
-  try {
-    if (!currentResumeData) return showError("No resume data available");
-
-    const response = await fetch(`${API_URL}/download-pdf`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(currentResumeData),
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Failed to generate PDF: ${err}`);
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${currentResumeData.name || "Resume"}.pdf`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("✗ PDF download error:", error.message);
-    showError("Failed to generate PDF");
-  }
-}
-
-// === DOWNLOAD WORD ===
-async function downloadDOCX() {
-  try {
-    if (!currentResumeData) return showError("No resume data available");
-
-    const response = await fetch(`${API_URL}/download-docx`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(currentResumeData),
-    });
-
-    if (!response.ok) throw new Error("Failed to generate DOCX");
-
-    const blob = await response.blob();
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "resume.docx";
-    link.click();
-  } catch (e) {
-    console.error("✗ DOCX download error:", e.message);
-    showError("Failed to generate Word document.");
-  }
-}
-
-// === COPY TO CLIPBOARD ===
-async function copyToClipboard() {
-  try {
-    if (!currentResumeData) return showError("No resume data available");
-    await navigator.clipboard.writeText(JSON.stringify(currentResumeData, null, 2));
-    showSuccess("Resume copied to clipboard!");
-  } catch (error) {
-    console.error("✗ Clipboard error:", error.message);
-    showError("Failed to copy to clipboard.");
-  }
-}
-
-// === UTILITIES ===
-function escapeHtml(text) {
-  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
-  return String(text).replace(/[&<>"']/g, (m) => map[m]);
+function toggleLoading(show) {
+  loadingOverlay.classList.toggle("hidden", !show);
+  generateBtn.disabled = show;
 }
 
 function showError(msg) {
-  if (!errorMessage) return;
   errorMessage.textContent = msg;
   errorMessage.classList.remove("hidden");
-  if (successMessage) successMessage.classList.add("hidden");
+  successMessage.classList.add("hidden");
 }
 
 function showSuccess(msg) {
-  if (!successMessage) return;
   successMessage.textContent = msg;
   successMessage.classList.remove("hidden");
-  if (errorMessage) errorMessage.classList.add("hidden");
+  errorMessage.classList.add("hidden");
 }
 
 function clearMessages() {
-  if (errorMessage) errorMessage.classList.add("hidden");
-  if (successMessage) successMessage.classList.add("hidden");
+  errorMessage.classList.add("hidden");
+  successMessage.classList.add("hidden");
 }
 
-console.log("🎉 ResumeCraft loaded and ready!");
+/* Copy JSON */
+copyBtn.addEventListener("click", async () => {
+  if (!currentResumeData) return showError("No data to copy.");
+  await navigator.clipboard.writeText(JSON.stringify(currentResumeData, null, 2));
+  showSuccess("Copied JSON to clipboard!");
+});
+
+/* Download PDF */
+downloadBtn.addEventListener("click", async () => {
+  if (!currentResumeData) return showError("Generate first!");
+  const response = await fetch(`${API_URL}/download-pdf`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(currentResumeData),
+  });
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "resume.pdf";
+  a.click();
+});
+
+/* Download DOCX */
+downloadWordBtn.addEventListener("click", async () => {
+  if (!currentResumeData) return showError("Generate first!");
+  const response = await fetch(`${API_URL}/download-docx`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(currentResumeData),
+  });
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "resume.docx";
+  a.click();
+});

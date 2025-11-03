@@ -1,24 +1,19 @@
+// ========================================
+// 🌐 ResumeCraft Backend Server (Fixed)
+// ========================================
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
 const resumeRoutes = require("./routes/resumeRoutes");
 const { errorHandler } = require("./middleware/errorHandler");
 const { version } = require("./package.json");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const path = require("path");
-
-// Serve frontend files
-app.use(express.static(path.join(__dirname, "../frontend")));
-
-// Fallback: send index.html for any unknown routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
-});
-
 
 // ========================================
 // 🚀 ResumeCraft Server Initialization
@@ -31,32 +26,45 @@ console.log(`Port: ${PORT}`);
 // ========================================
 // 🧩 MIDDLEWARE
 // ========================================
-
 try {
-  // Security headers
+  // 🛡️ Security headers
   app.use(helmet());
   console.log("✓ Helmet security enabled");
 
-  // JSON & URL Encoded Parser
+  // 🧾 Body parsers
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
   console.log("✓ Body parser configured");
 
-  // CORS
+  // 🌍 CORS Configuration (Fixed)
+  const allowedOrigins = [
+    "http://localhost:3000", // Local development
+    "https://resume-maker-91k6.onrender.com", // Render deployment
+  ];
+
   app.use(
     cors({
-      origin: "*",
+      origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("CORS not allowed for this origin"));
+        }
+      },
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   );
-  console.log("✓ CORS enabled");
 
-  // Rate Limiting
+  // ✅ Handle preflight OPTIONS requests
+  app.options("*", cors());
+  console.log("✓ CORS configured for:", allowedOrigins);
+
+  // 🚦 Rate Limiting
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === "production" ? 30 : 1000, // 30 in prod, 1000 in dev
+    max: process.env.NODE_ENV === "production" ? 30 : 1000,
     message: "Too many requests from this IP, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
@@ -108,38 +116,28 @@ try {
 }
 
 // ========================================
-// ⚠️ 404 HANDLER
+// 🏠 SERVE FRONTEND (if needed)
 // ========================================
+app.use(express.static(path.join(__dirname, "../frontend")));
 
-// ✅ Root route (homepage)
-app.get("/", (req, res) => {
-  res.send(`
-    <h1 style="text-align:center; font-family:Arial;">🚀 ResumeCraft Backend is Running!</h1>
-    <p style="text-align:center;">Available Endpoints:</p>
-    <ul style="font-family:Arial; line-height:1.6;">
-      <li>✅ GET /health</li>
-      <li>✅ POST /api/generate-resume</li>
-      <li>✅ POST /api/download-pdf</li>
-      <li>✅ POST /api/download-docx</li>
-    </ul>
-    <p style="text-align:center; color:gray;">© 2025 ResumeCraft AI</p>
-  `);
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
+// ========================================
+// ⚠️ 404 HANDLER
+// ========================================
 app.use((req, res) => {
-  try {
-    res.status(404).json({
-      success: false,
-      error: `Route ${req.method} ${req.path} not found`,
-      availableEndpoints: [
-        "GET /health",
-        "POST /api/generate-resume",
-      ],
-    });
-  } catch (error) {
-    console.error("✗ 404 handler error:", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  res.status(404).json({
+    success: false,
+    error: `Route ${req.method} ${req.path} not found`,
+    availableEndpoints: [
+      "GET /health",
+      "POST /api/generate-resume",
+      "POST /api/download-pdf",
+      "POST /api/download-docx",
+    ],
+  });
 });
 
 // ========================================
@@ -184,6 +182,6 @@ const gracefulShutdown = (signal) => {
 };
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT")); // Handles Ctrl+C
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 module.exports = app;
