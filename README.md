@@ -76,6 +76,7 @@ Visit: [http://localhost:5000](http://localhost:5000)
 
 ## 🖼️ UI Preview
 The modern **Glassmorphic ResumeCraft** interface provides an elegant and smooth experience for users generating their resumes.
+<img width="1919" height="907" alt="image" src="https://github.com/user-attachments/assets/d2560eaf-00ea-420e-8af6-9b2e4d1eee5c" />
 
 ---
 
